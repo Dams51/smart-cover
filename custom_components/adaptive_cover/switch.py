@@ -1,4 +1,4 @@
-"""Switch platform for the Adaptive Cover integration."""
+"""Switch platform for the Smart Cover integration."""
 
 from __future__ import annotations
 
@@ -110,7 +110,7 @@ async def async_setup_entry(
 class AdaptiveCoverSwitch(
     CoordinatorEntity[AdaptiveDataUpdateCoordinator], SwitchEntity, RestoreEntity
 ):
-    """Representation of a adaptive cover switch."""
+    """Representation of a smart cover switch."""
 
     _attr_has_entity_name = True
     _attr_should_poll = False

@@ -40,7 +40,7 @@
   },
   "forwardPorts": [8123],
   "image": "mcr.microsoft.com/devcontainers/python:3.12",
-  "name": "Adaptive Cover Dev-env",
+  "name": "Smart Cover Dev-env",
   "postCreateCommand": "scripts/setup",
   "remoteUser": "vscode"
 }

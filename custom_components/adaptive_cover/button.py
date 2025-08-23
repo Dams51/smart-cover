@@ -1,4 +1,4 @@
-"""Button platform for the Adaptive Cover integration."""
+"""Button platform for the Smart Cover integration."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ async def async_setup_entry(
 class AdaptiveCoverButton(
     CoordinatorEntity[AdaptiveDataUpdateCoordinator], ButtonEntity
 ):
-    """Representation of a adaptive cover button."""
+    """Representation of a smart cover button."""
 
     _attr_has_entity_name = True
     _attr_should_poll = False

@@ -1,4 +1,4 @@
-"""The Coordinator for Adaptive Cover."""
+"""The Coordinator for Smart Cover."""
 
 from __future__ import annotations
 
@@ -121,7 +121,7 @@ class AdaptiveCoverData:
 
 
 class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
-    """Adaptive cover data update coordinator."""
+    """Smart cover data update coordinator."""
 
     config_entry: ConfigEntry
 

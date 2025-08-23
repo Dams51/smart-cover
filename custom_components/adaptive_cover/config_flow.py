@@ -1,4 +1,4 @@
-"""Config flow for Adaptive Cover integration."""
+"""Config flow for Smart Cover integration."""
 
 from __future__ import annotations
 
@@ -77,7 +77,7 @@ from .const import (
     CONF_ENABLE_MIN_POSITION,
 )
 
-# DEFAULT_NAME = "Adaptive Cover"
+# DEFAULT_NAME = "Smart Cover"
 
 SENSOR_TYPE_MENU = [SensorType.BLIND, SensorType.AWNING, SensorType.TILT]
 

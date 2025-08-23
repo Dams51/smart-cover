@@ -1,15 +1,16 @@
-![Version](https://img.shields.io/github/v/release/basbruss/adaptive-cover?style=for-the-badge)
+![Version](https://img.shields.io/github/v/release/Dams51/smart-cover?style=for-the-badge)
 
-![logo](https://github.com/basbruss/adaptive-cover/blob/main/images/logo.png#gh-light-mode-only)
-![logo](https://github.com/basbruss/adaptive-cover/blob/main/images/dark_logo.png#gh-dark-mode-only)
+# Warning : development in progress
+## This is a fork of [basbruss/adaptive-cover](https://github.com/basbruss/adaptive-cover) but my goal is to make it work another way
 
-# Adaptive Cover
+
+# Smart Cover
 
 This Custom-Integration provides sensors for vertical and horizontal blinds based on the sun's position by calculating the position to filter out direct sunlight.
 
 This integration builds upon the template sensor from this forum post [Automatic Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control-based-on-sun-platform/)
 
-- [Adaptive Cover](#adaptive-cover)
+- [Smart Cover](#adaptive-cover)
   - [Features](#features)
   - [Installation](#installation)
     - [HACS (Recommended)](#hacs-recommended)
@@ -36,7 +37,7 @@ This integration builds upon the template sensor from this forum post [Automatic
 ## Features
 
 - Individual service devices for `vertical`, `horizontal` and `tilted` covers
-- Two mode approach with multiple strategies [Modes(`basic`,`climate`)](https://github.com/basbruss/adaptive-cover?tab=readme-ov-file#modes)
+- Two mode approach with multiple strategies [Modes(`basic`,`climate`)](https://github.com/Dams51/smart-cover?tab=readme-ov-file#modes)
 - Binary Sensor to track when the sun is in front of the window
 - Sensors for `start` and `end` time
 - Auto manual override detection
@@ -60,21 +61,21 @@ This integration builds upon the template sensor from this forum post [Automatic
 
 ### HACS (Recommended)
 
-Add <https://github.com/basbruss/adaptive-cover> as custom repository to HACS.
-Search and download Adaptive Cover within HACS.
+Add <https://github.com/Dams51/smart-cover> as custom repository to HACS.
+Search and download Smart Cover within HACS.
 
 Restart Home-Assistant and add the integration.
 
 ### Manual
 
-Download the `adaptive_cover` folder from this github.
+Download the `smart_cover` folder from this github.
 Add the folder to `config/custom_components/`.
 
 Restart Home-Assistant and add the integration.
 
 ## Setup
 
-Adaptive Cover supports (for now) three types of covers/blinds; `Vertical` and `Horizontal` and `Venetian (Tilted)` blinds.
+Smart Cover supports (for now) three types of covers/blinds; `Vertical` and `Horizontal` and `Venetian (Tilted)` blinds.
 Each type has its own specific parameters to setup a sensor. To setup the sensor you first need to find out the azimuth of the window(s). This can be done by finding your location on [Open Street Map Compass](https://osmcompass.com/).
 
 ## Cover Types
@@ -147,7 +148,7 @@ This mode uses the calculated position when the sun is within the specified azim
 ### Climate mode
 
 This mode calculates the position based on extra parameters for presence, indoor temperature, minimal comfort temperature, maximum comfort temperature and weather (optional).
-This mode is split up in two types of strategies; [Presence](https://github.com/basbruss/adaptive-cover?tab=readme-ov-file#presence) and [No Presence](https://github.com/basbruss/adaptive-cover?tab=readme-ov-file#no-presence).
+This mode is split up in two types of strategies; [Presence](https://github.com/Dams51/smart-cover?tab=readme-ov-file#presence) and [No Presence](https://github.com/Dams51/smart-cover?tab=readme-ov-file#no-presence).
 
 #### Climate strategies
 
@@ -274,7 +275,7 @@ When climate mode is setup you will also get these entities:
 | `switch.{type}_climate_mode_{name}`        | `on`    | Enables climate mode strategy; otherwise, defaults to the standard strategy.                                |
 | `switch.{type}_outside_temperature_{name}` | `on`    | Switches between inside and outside temperatures as the basis for determining the climate control strategy. |
 
-![entities](https://github.com/basbruss/adaptive-cover/blob/main/images/entities.png)
+![entities](https://github.com/Dams51/smart-cover/blob/main/images/entities.png)
 
 ## Features Planned
 
@@ -288,7 +289,7 @@ When climate mode is setup you will also get these entities:
 
 ### Simulation
 
-![combined_simulation](custom_components/adaptive_cover/simulation/sim_plot.png)
+![combined_simulation](custom_components/smart_cover/simulation/sim_plot.png)
 
 ### Blueprint (deprecated since v1.0.0)
 

@@ -1,4 +1,4 @@
-"""The Adaptive Cover integration."""
+"""The Smart Cover integration."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ async def async_initialize_integration(
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Adaptive Cover from a config entry."""
+    """Set up Smart Cover from a config entry."""
 
     hass.data.setdefault(DOMAIN, {})
 
