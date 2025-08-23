@@ -46,7 +46,7 @@ from .const import (
     CONF_BLIND_SPOT_LEFT,
     CONF_BLIND_SPOT_RIGHT,
     CONF_CLIMATE_MODE,
-    CONF_DEFAULT_HEIGHT,
+    CONF_DEFAULT_POS,
     CONF_DELTA_POSITION,
     CONF_DELTA_TIME,
     CONF_DISTANCE,
@@ -344,7 +344,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 "manual_list": self.manager.manual_controlled,
             },
             attributes={
-                "default": options.get(CONF_DEFAULT_HEIGHT),
+                "default": options.get(CONF_DEFAULT_POS),
                 "sunset_default": options.get(CONF_SUNSET_POS),
                 "sunset_offset": options.get(CONF_SUNSET_OFFSET),
                 "azimuth_window": options.get(CONF_AZIMUTH),
@@ -595,7 +595,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             )
             if state in [
                 options.get(CONF_SUNSET_POS),
-                options.get(CONF_DEFAULT_HEIGHT),
+                options.get(CONF_DEFAULT_POS),
                 0,
                 100,
             ]:
@@ -637,7 +637,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             options.get(CONF_FOV_LEFT),
             options.get(CONF_FOV_RIGHT),
             options.get(CONF_AZIMUTH),
-            options.get(CONF_DEFAULT_HEIGHT),
+            options.get(CONF_DEFAULT_POS),
             options.get(CONF_MAX_POSITION),
             options.get(CONF_MIN_POSITION),
             options.get(CONF_ENABLE_MAX_POSITION, False),
