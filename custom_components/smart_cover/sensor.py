@@ -13,7 +13,6 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -122,7 +121,6 @@ class AdaptiveCoverSensorEntity(
     def device_info(self) -> DeviceInfo:
         """Return device info."""
         return DeviceInfo(
-            entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._device_id)},
             name=self._device_name,
         )
@@ -192,7 +190,6 @@ class AdaptiveCoverTimeSensorEntity(
     def device_info(self) -> DeviceInfo:
         """Return device info."""
         return DeviceInfo(
-            entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._device_id)},
             name=self._device_name,
         )
@@ -254,7 +251,6 @@ class AdaptiveCoverControlSensorEntity(
     def device_info(self) -> DeviceInfo:
         """Return device info."""
         return DeviceInfo(
-            entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._device_id)},
             name=self._device_name,
         )

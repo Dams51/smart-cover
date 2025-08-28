@@ -234,6 +234,27 @@ TILT_OPTIONS = vol.Schema(
     }
 ).extend(COVER_SCHEMA.schema)
 
+INTERPOLATION_OPTIONS = vol.Schema(
+    {
+        vol.Optional(CONF_INTERP_START): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=100)
+        ),
+        vol.Optional(CONF_INTERP_END): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=100)
+        ),
+        vol.Optional(CONF_INTERP_LIST, default=[]): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                multiple=True, custom_value=True, options=["0", "50", "100"]
+            )
+        ),
+        vol.Optional(CONF_INTERP_LIST_NEW, default=[]): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                multiple=True, custom_value=True, options=["0", "50", "100"]
+            )
+        ),
+    }
+)
+
 CLIMATE_MODE = vol.Schema(
     {
         vol.Optional(CONF_CLIMATE_MODE, default=False): selector.BooleanSelector(),
@@ -359,27 +380,6 @@ AUTOMATION_CONFIG = vol.Schema(
             selector.EntitySelectorConfig(domain=["sensor", "input_datetime"])
         ),
         vol.Optional(CONF_RETURN_SUNSET, default=False): bool,
-    }
-)
-
-INTERPOLATION_OPTIONS = vol.Schema(
-    {
-        vol.Optional(CONF_INTERP_START): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=100)
-        ),
-        vol.Optional(CONF_INTERP_END): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=100)
-        ),
-        vol.Optional(CONF_INTERP_LIST, default=[]): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                multiple=True, custom_value=True, options=["0", "50", "100"]
-            )
-        ),
-        vol.Optional(CONF_INTERP_LIST_NEW, default=[]): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                multiple=True, custom_value=True, options=["0", "50", "100"]
-            )
-        ),
     }
 )
 

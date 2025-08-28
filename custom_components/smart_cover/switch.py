@@ -8,6 +8,7 @@ from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -36,7 +37,7 @@ async def async_setup_entry(
         config_entry.entry_id
     ]
 
-    manual_switch = AdaptiveCoverSwitch(
+    manual_switch = WindowSwitch(
         config_entry,
         config_entry.entry_id,
         "Manual Override",
@@ -44,7 +45,7 @@ async def async_setup_entry(
         "manual_toggle",
         coordinator,
     )
-    control_switch = AdaptiveCoverSwitch(
+    control_switch = WindowSwitch(
         config_entry,
         config_entry.entry_id,
         "Toggle Control",
@@ -52,7 +53,9 @@ async def async_setup_entry(
         "control_toggle",
         coordinator,
     )
-    climate_switch = AdaptiveCoverSwitch(
+
+
+    climate_switch = AutomationSwitch(
         config_entry,
         config_entry.entry_id,
         "Climate Mode",
@@ -60,7 +63,7 @@ async def async_setup_entry(
         "switch_mode",
         coordinator,
     )
-    temp_switch = AdaptiveCoverSwitch(
+    temp_switch = AutomationSwitch(
         config_entry,
         config_entry.entry_id,
         "Outside Temperature",
@@ -68,7 +71,7 @@ async def async_setup_entry(
         "temp_toggle",
         coordinator,
     )
-    lux_switch = AdaptiveCoverSwitch(
+    lux_switch = AutomationSwitch(
         config_entry,
         config_entry.entry_id,
         "Lux",
@@ -76,7 +79,7 @@ async def async_setup_entry(
         "lux_toggle",
         coordinator,
     )
-    irradiance_switch = AdaptiveCoverSwitch(
+    irradiance_switch = AutomationSwitch(
         config_entry,
         config_entry.entry_id,
         "Irradiance",
@@ -107,7 +110,7 @@ async def async_setup_entry(
     async_add_entities(switches)
 
 
-class AdaptiveCoverSwitch(
+class WindowSwitch(
     CoordinatorEntity[AdaptiveDataUpdateCoordinator], SwitchEntity, RestoreEntity
 ):
     """Representation of a smart cover switch."""
@@ -143,6 +146,89 @@ class AdaptiveCoverSwitch(
         self._attr_unique_id = f"{unique_id}_{switch_name}"
         self._device_id = unique_id
         self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, self._device_id)},
+            name=self._device_name,
+        )
+
+        self.coordinator.logger.debug("Setup switch")
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return f"{self._switch_name} {self._name}"
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the switch on."""
+        self.coordinator.logger.debug("Turning on")
+        self._attr_is_on = True
+        setattr(self.coordinator, self._key, True)
+        if self._key == "control_toggle" and kwargs.get("added") is not True:
+            for entity in self.coordinator.entities:
+                if (
+                    not self.coordinator.manager.is_cover_manual(entity)
+                    and self.coordinator.check_adaptive_time
+                ):
+                    await self.coordinator.async_set_position(
+                        entity, self.coordinator.state
+                    )
+        await self.coordinator.async_refresh()
+        self.schedule_update_ha_state()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the device off."""
+        self.coordinator.logger.debug("Turning off")
+        self._attr_is_on = False
+        setattr(self.coordinator, self._key, False)
+        if self._key == "control_toggle" and kwargs.get("added") is not True:
+            for entity in self.coordinator.manager.manual_controlled:
+                self.coordinator.manager.reset(entity)
+        await self.coordinator.async_refresh()
+        self.schedule_update_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        """Call when entity about to be added to hass."""
+        last_state = await self.async_get_last_state()
+        self.coordinator.logger.debug("%s: last state is %s", self._name, last_state)
+        if (last_state is None and self._initial_state) or (
+            last_state is not None and last_state.state == STATE_ON
+        ):
+            await self.async_turn_on(added=True)
+        else:
+            await self.async_turn_off(added=True)
+
+
+class AutomationSwitch(
+    CoordinatorEntity[AdaptiveDataUpdateCoordinator], SwitchEntity, RestoreEntity
+):
+    """Representation of a smart cover switch."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+
+    def __init__(
+        self,
+        config_entry,
+        unique_id: str,
+        switch_name: str,
+        initial_state: bool,
+        key: str,
+        coordinator: AdaptiveDataUpdateCoordinator,
+        device_class: SwitchDeviceClass | None = None,
+    ) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator=coordinator)
+        self._name = config_entry.data["name"]
+        self._state: bool | None = None
+        self._key = key
+        self._attr_translation_key = key
+        self._device_name = "Automation"
+        self._switch_name = switch_name
+        self._attr_device_class = device_class
+        self._initial_state = initial_state
+        self._attr_unique_id = f"{unique_id}_{switch_name}"
+        self._device_id = unique_id
+        self._attr_device_info = DeviceInfo(
+            entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._device_id)},
             name=self._device_name,
         )
