@@ -1,7 +1,7 @@
 {
   "domain": "smart_cover",
   "name": "Smart Cover",
-  "codeowners": ["@basbruss"],
+  "codeowners": ["@Dams51"],
   "config_flow": true,
   "dependencies": [
     "sun",
@@ -15,5 +15,5 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/Dams51/smart-cover/issues",
   "requirements": ["astral", "pandas"],
-  "version": "0.3.0b0"
+  "version": "v0.0.0"
 }
