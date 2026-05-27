@@ -10,6 +10,9 @@ from homeassistant.helpers.event import (
 )
 
 from .const import (
+    CONF_AUTOMATION_ID,
+    CONF_OBJECT_TYPE,
+    ObjectType,
     CONF_END_ENTITY,
     CONF_ENTITIES,
     CONF_PRESENCE_ENTITY,
@@ -38,12 +41,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
 
-    coordinator = AdaptiveDataUpdateCoordinator(hass)
-    _temp_entity = entry.options.get(CONF_TEMP_ENTITY)
-    _presence_entity = entry.options.get(CONF_PRESENCE_ENTITY)
-    _weather_entity = entry.options.get(CONF_WEATHER_ENTITY)
-    _cover_entities = entry.options.get(CONF_ENTITIES, [])
-    _end_time_entity = entry.options.get(CONF_END_ENTITY)
+    object_type = entry.data.get(CONF_OBJECT_TYPE)
+
+    # Les entrées AUTOMATION ne créent rien : elles sont juste
+    # un réservoir de config lu par les entrées WINDOW
+    if object_type == ObjectType.AUTOMATION:
+        _LOGGER.debug("Registering automation entry %s", entry.data.get("name"))
+        hass.data[DOMAIN][entry.entry_id] = entry  # on stocke l'entry elle-même
+        entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+        return True
+
+    # Pour les entrées WINDOW, setup normal du coordinateur
+    # Calculer les options fusionnées pour le tracking
+    automation_id = entry.options.get(CONF_AUTOMATION_ID)
+    merged = dict(entry.options)
+    if automation_id:
+        automation_entry = hass.config_entries.async_get_entry(automation_id)
+        if automation_entry:
+            merged = {**automation_entry.options, **entry.options}
+
+    _temp_entity = merged.get(CONF_TEMP_ENTITY)
+    _presence_entity = merged.get(CONF_PRESENCE_ENTITY)
+    _weather_entity = merged.get(CONF_WEATHER_ENTITY)
+    _cover_entities = merged.get(CONF_ENTITIES, [])
+    _end_time_entity = merged.get(CONF_END_ENTITY)
     _entities = ["sun.sun"]
     for entity in [_temp_entity, _presence_entity, _weather_entity, _end_time_entity]:
         if entity is not None:
@@ -51,6 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     _LOGGER.debug("Setting up entry %s", entry.data.get("name"))
 
+    coordinator = AdaptiveDataUpdateCoordinator(hass)
     entry.async_on_unload(
         async_track_state_change_event(
             hass,
@@ -86,4 +108,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
-    await hass.config_entries.async_reload(entry.entry_id)
+    if entry.data.get(CONF_OBJECT_TYPE) == ObjectType.AUTOMATION:
+        # Recharger toutes les fenêtres qui référencent cette automation
+        linked_windows = [
+            e
+            for e in hass.config_entries.async_entries(DOMAIN)
+            if e.options.get(CONF_AUTOMATION_ID) == entry.entry_id
+        ]
+        for window_entry in linked_windows:
+            await hass.config_entries.async_reload(window_entry.entry_id)
+    else:
+        await hass.config_entries.async_reload(entry.entry_id)

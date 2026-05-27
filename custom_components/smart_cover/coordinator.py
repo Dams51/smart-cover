@@ -40,6 +40,7 @@ from .const import (
     _LOGGER,
     ATTR_POSITION,
     ATTR_TILT_POSITION,
+    CONF_AUTOMATION_ID,
     CONF_AWNING_ANGLE,
     CONF_AZIMUTH,
     CONF_BLIND_SPOT_ELEVATION,
@@ -169,6 +170,20 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         self._cached_options = None
 
+    @property
+    def merged_options(self) -> dict:
+        """Fusionner les options fenêtre + automation liée."""
+
+        automation_id = self.config_entry.options.get(CONF_AUTOMATION_ID)
+        if automation_id:
+            automation_entry = self.hass.config_entries.async_get_entry(automation_id)
+            if automation_entry:
+                # Base = automation, la fenêtre a priorité sur les clés communes
+                merged = dict(automation_entry.options)
+                merged.update(self.config_entry.options)
+                return merged
+        return dict(self.config_entry.options)
+
     async def async_config_entry_first_refresh(self) -> None:
         """Config entry first refresh."""
         self.first_refresh = True
@@ -271,9 +286,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     async def _async_update_data(self) -> AdaptiveCoverData:
         self.logger.debug("Updating data")
         if self.first_refresh:
-            self._cached_options = self.config_entry.options
+            self._cached_options = self.merged_options
 
-        options = self.config_entry.options
+        options = self.merged_options
         self._update_options(options)
 
         # Get data for the blind

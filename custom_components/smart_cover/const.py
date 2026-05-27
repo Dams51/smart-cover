@@ -29,9 +29,7 @@ CONF_SUNSET_OFFSET = "sunset_offset"
 CONF_TILT_DEPTH = "slat_depth"
 CONF_TILT_DISTANCE = "slat_distance"
 CONF_TILT_MODE = "tilt_mode"
-CONF_SUNSET_POS = "sunset_position"
 CONF_ENABLE_SUNSET_POS = "enable_sunset_pos"
-CONF_SUNSET_OFFSET = "sunset_offset"
 CONF_SUNRISE_OFFSET = "sunrise_offset"
 CONF_TEMP_ENTITY = "temp_entity"
 CONF_PRESENCE_ENTITY = "presence_entity"
@@ -40,6 +38,7 @@ CONF_TEMP_LOW = "temp_low"
 CONF_TEMP_HIGH = "temp_high"
 CONF_OBJECT = "object"
 CONF_MODE = "mode"
+CONF_AUTOMATION_ID = "automation_id"
 CONF_CLIMATE_MODE = "climate_mode"
 CONF_WEATHER_STATE = "weather_state"
 CONF_MAX_POSITION = "max_position"
@@ -91,6 +90,7 @@ class ObjectType:
 
     WINDOW = "window"
     AUTOMATION = "automation"
+
 
 class SensorType:
     """Possible modes for a number selector."""
