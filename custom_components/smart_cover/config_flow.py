@@ -105,13 +105,18 @@ CONFIG_NAME_SCHEMA = vol.Schema(
     }
 )
 
-WINDOW_SCHEMA = vol.Schema(
+CONFIG_WINDOW_TYPE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_MODE): selector.SelectSelector(
             selector.SelectSelectorConfig(
                 options=SENSOR_TYPE_MENU, translation_key="mode"
             )
         ),
+    }
+)
+
+WINDOW_SCHEMA = vol.Schema(
+    {
         vol.Required(CONF_AZIMUTH, default=180): selector.NumberSelector(
             selector.NumberSelectorConfig(
                 min=0, max=359, mode="slider", unit_of_measurement="°"
@@ -429,7 +434,9 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 return await self.async_step_tilt()
         return self.async_show_form(
             step_id="window",
-            data_schema=CONFIG_NAME_SCHEMA.extend(WINDOW_SCHEMA.schema),
+            data_schema=CONFIG_NAME_SCHEMA.extend(
+                CONFIG_WINDOW_TYPE_SCHEMA.extend(WINDOW_SCHEMA.schema).schema
+            ),
         )
 
     async def async_step_vertical(self, user_input: dict[str, Any] | None = None):
