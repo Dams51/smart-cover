@@ -11,7 +11,13 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import _LOGGER, CONF_ENTITIES, CONF_SENSOR_TYPE, DOMAIN
+from .const import (
+    CONF_OBJECT_TYPE,
+    ObjectType,
+    _LOGGER,
+    CONF_ENTITIES,
+    DOMAIN,
+)
 from .coordinator import AdaptiveDataUpdateCoordinator
 
 
@@ -25,15 +31,18 @@ async def async_setup_entry(
         config_entry.entry_id
     ]
 
-    reset_manual = AdaptiveCoverButton(
-        config_entry, config_entry.entry_id, "Reset Manual Override", coordinator
-    )
-
     buttons = []
 
-    entities = config_entry.options.get(CONF_ENTITIES, [])
-    if len(entities) >= 1:
-        buttons = [reset_manual]
+    object_type = config_entry.data.get(CONF_OBJECT_TYPE)
+
+    if object_type == ObjectType.WINDOW:
+        reset_manual = AdaptiveCoverButton(
+            config_entry, config_entry.entry_id, "Reset Manual Override", coordinator
+        )
+
+        entities = config_entry.options.get(CONF_ENTITIES, [])
+        if len(entities) >= 1:
+            buttons = [reset_manual]
 
     async_add_entities(buttons)
 
@@ -62,7 +71,7 @@ class AdaptiveCoverButton(
             "cover_tilt": "Tilt",
         }
         self._name = config_entry.data["name"]
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
+        self._device_name = config_entry.data["name"]
         self._attr_unique_id = f"{unique_id}_{button_name}"
         self._device_id = unique_id
         self._button_name = button_name
@@ -75,7 +84,7 @@ class AdaptiveCoverButton(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._button_name} {self._name}"
+        return f"{self._button_name}"
 
     async def async_press(self) -> None:
         """Handle the button press."""

@@ -15,12 +15,13 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    CONF_OBJECT_TYPE,
+    ObjectType,
     CONF_CLIMATE_MODE,
     CONF_ENTITIES,
     CONF_IRRADIANCE_ENTITY,
     CONF_LUX_ENTITY,
     CONF_OUTSIDETEMP_ENTITY,
-    CONF_SENSOR_TYPE,
     CONF_WEATHER_ENTITY,
     DOMAIN,
 )
@@ -37,75 +38,82 @@ async def async_setup_entry(
         config_entry.entry_id
     ]
 
-    manual_switch = WindowSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Manual Override",
-        True,
-        "manual_toggle",
-        coordinator,
-    )
-    control_switch = WindowSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Toggle Control",
-        True,
-        "control_toggle",
-        coordinator,
-    )
-
-
-    climate_switch = AutomationSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Climate Mode",
-        True,
-        "switch_mode",
-        coordinator,
-    )
-    temp_switch = AutomationSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Outside Temperature",
-        False,
-        "temp_toggle",
-        coordinator,
-    )
-    lux_switch = AutomationSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Lux",
-        True,
-        "lux_toggle",
-        coordinator,
-    )
-    irradiance_switch = AutomationSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Irradiance",
-        True,
-        "irradiance_toggle",
-        coordinator,
-    )
-
-    climate_mode = config_entry.options.get(CONF_CLIMATE_MODE)
-    weather_entity = config_entry.options.get(CONF_WEATHER_ENTITY)
-    sensor_entity = config_entry.options.get(CONF_OUTSIDETEMP_ENTITY)
-    lux_entity = config_entry.options.get(CONF_LUX_ENTITY)
-    irradiance_entity = config_entry.options.get(CONF_IRRADIANCE_ENTITY)
     switches = []
 
-    if len(config_entry.options.get(CONF_ENTITIES)) >= 1:
-        switches = [control_switch, manual_switch]
+    object_type = config_entry.data.get(CONF_OBJECT_TYPE)
 
-    if climate_mode:
-        switches.append(climate_switch)
-        if weather_entity or sensor_entity:
-            switches.append(temp_switch)
-        if lux_entity:
-            switches.append(lux_switch)
-        if irradiance_entity:
-            switches.append(irradiance_switch)
+    if object_type == ObjectType.WINDOW:
+        manual_switch = WindowSwitch(
+            config_entry,
+            config_entry.entry_id,
+            "Manual Override",
+            True,
+            "manual_toggle",
+            coordinator,
+        )
+        control_switch = WindowSwitch(
+            config_entry,
+            config_entry.entry_id,
+            "Toggle Control",
+            True,
+            "control_toggle",
+            coordinator,
+        )
+
+        if (
+            config_entry.options.get(CONF_ENTITIES)
+            and len(config_entry.options.get(CONF_ENTITIES)) >= 1
+        ):
+            switches = [control_switch, manual_switch]
+
+    if object_type == ObjectType.AUTOMATION:
+        climate_switch = AutomationSwitch(
+            config_entry,
+            config_entry.entry_id,
+            "Climate Mode",
+            True,
+            "switch_mode",
+            coordinator,
+        )
+        temp_switch = AutomationSwitch(
+            config_entry,
+            config_entry.entry_id,
+            "Outside Temperature",
+            False,
+            "temp_toggle",
+            coordinator,
+        )
+        lux_switch = AutomationSwitch(
+            config_entry,
+            config_entry.entry_id,
+            "Lux",
+            True,
+            "lux_toggle",
+            coordinator,
+        )
+        irradiance_switch = AutomationSwitch(
+            config_entry,
+            config_entry.entry_id,
+            "Irradiance",
+            True,
+            "irradiance_toggle",
+            coordinator,
+        )
+
+        climate_mode = config_entry.options.get(CONF_CLIMATE_MODE)
+        weather_entity = config_entry.options.get(CONF_WEATHER_ENTITY)
+        sensor_entity = config_entry.options.get(CONF_OUTSIDETEMP_ENTITY)
+        lux_entity = config_entry.options.get(CONF_LUX_ENTITY)
+        irradiance_entity = config_entry.options.get(CONF_IRRADIANCE_ENTITY)
+
+        if climate_mode:
+            switches.append(climate_switch)
+            if weather_entity or sensor_entity:
+                switches.append(temp_switch)
+            if lux_entity:
+                switches.append(lux_switch)
+            if irradiance_entity:
+                switches.append(irradiance_switch)
 
     async_add_entities(switches)
 
@@ -139,7 +147,7 @@ class WindowSwitch(
         self._state: bool | None = None
         self._key = key
         self._attr_translation_key = key
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
+        self._device_name = config_entry.data["name"]
         self._switch_name = switch_name
         self._attr_device_class = device_class
         self._initial_state = initial_state
@@ -155,7 +163,7 @@ class WindowSwitch(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._switch_name} {self._name}"
+        return f"{self._switch_name}"
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
@@ -221,7 +229,7 @@ class AutomationSwitch(
         self._state: bool | None = None
         self._key = key
         self._attr_translation_key = key
-        self._device_name = "Automation"
+        self._device_name = config_entry.data["name"]
         self._switch_name = switch_name
         self._attr_device_class = device_class
         self._initial_state = initial_state
@@ -238,7 +246,16 @@ class AutomationSwitch(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._switch_name} {self._name}"
+        return f"{self._switch_name}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device info."""
+        return DeviceInfo(
+            entry_type=DeviceEntryType.SERVICE,
+            identifiers={(DOMAIN, self._device_id)},
+            name=self._device_name,
+        )
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""

@@ -608,7 +608,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             "cover_tilt": "Tilt",
         }
         return self.async_create_entry(
-            title=f"{self.config['name']} - {type[self.type_blind]}",
+            title=f"{self.config['name']} - Window - {type[self.type_blind]}",
             data={
                 "name": self.config["name"],
                 CONF_OBJECT_TYPE: self.type_object,

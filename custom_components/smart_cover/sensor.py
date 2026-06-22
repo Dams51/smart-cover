@@ -18,7 +18,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    CONF_SENSOR_TYPE,
+    CONF_OBJECT_TYPE,
+    ObjectType,
     DOMAIN,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
@@ -36,33 +37,40 @@ async def async_setup_entry(
         config_entry.entry_id
     ]
 
-    sensor = AdaptiveCoverSensorEntity(
-        config_entry.entry_id, hass, config_entry, name, coordinator
-    )
-    start = AdaptiveCoverTimeSensorEntity(
-        config_entry.entry_id,
-        hass,
-        config_entry,
-        name,
-        "Start Sun",
-        "start",
-        "mdi:sun-clock-outline",
-        coordinator,
-    )
-    end = AdaptiveCoverTimeSensorEntity(
-        config_entry.entry_id,
-        hass,
-        config_entry,
-        name,
-        "End Sun",
-        "end",
-        "mdi:sun-clock",
-        coordinator,
-    )
-    control = AdaptiveCoverControlSensorEntity(
-        config_entry.entry_id, hass, config_entry, name, coordinator
-    )
-    async_add_entities([sensor, start, end, control])
+    sensors = []
+
+    object_type = config_entry.data.get(CONF_OBJECT_TYPE)
+
+    if object_type == ObjectType.WINDOW:
+        sensor = AdaptiveCoverSensorEntity(
+            config_entry.entry_id, hass, config_entry, name, coordinator
+        )
+        start = AdaptiveCoverTimeSensorEntity(
+            config_entry.entry_id,
+            hass,
+            config_entry,
+            name,
+            "Start Sun",
+            "start",
+            "mdi:sun-clock-outline",
+            coordinator,
+        )
+        end = AdaptiveCoverTimeSensorEntity(
+            config_entry.entry_id,
+            hass,
+            config_entry,
+            name,
+            "End Sun",
+            "end",
+            "mdi:sun-clock",
+            coordinator,
+        )
+        control = AdaptiveCoverControlSensorEntity(
+            config_entry.entry_id, hass, config_entry, name, coordinator
+        )
+        sensors = [sensor, start, end, control]
+
+    async_add_entities(sensors)
 
 
 class AdaptiveCoverSensorEntity(
@@ -98,7 +106,7 @@ class AdaptiveCoverSensorEntity(
         self.hass = hass
         self.config_entry = config_entry
         self._name = name
-        self._device_name = self.type[self.config_entry.data[CONF_SENSOR_TYPE]]
+        self._device_name = config_entry.data["name"]
         self._device_id = unique_id
 
     @callback
@@ -110,7 +118,7 @@ class AdaptiveCoverSensorEntity(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._sensor_name} {self._name}"
+        return f"{self._sensor_name}"
 
     @property
     def native_value(self) -> str | None:
@@ -168,7 +176,7 @@ class AdaptiveCoverTimeSensorEntity(
         self._name = name
         self._cover_type = self.config_entry.data["sensor_type"]
         self._sensor_name = sensor_name
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
+        self._device_name = config_entry.data["name"]
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -179,7 +187,7 @@ class AdaptiveCoverTimeSensorEntity(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._sensor_name} {self._name}"
+        return f"{self._sensor_name}"
 
     @property
     def native_value(self) -> str | None:
@@ -229,7 +237,7 @@ class AdaptiveCoverControlSensorEntity(
         self.config_entry = config_entry
         self._name = name
         self._cover_type = self.config_entry.data["sensor_type"]
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
+        self._device_name = config_entry.data["name"]
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -240,7 +248,7 @@ class AdaptiveCoverControlSensorEntity(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._sensor_name} {self._name}"
+        return f"{self._sensor_name}"
 
     @property
     def native_value(self) -> str | None:

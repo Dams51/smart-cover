@@ -15,7 +15,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_SENSOR_TYPE, DOMAIN
+from .const import CONF_OBJECT_TYPE, ObjectType, DOMAIN
 from .coordinator import AdaptiveDataUpdateCoordinator
 
 
@@ -29,25 +29,32 @@ async def async_setup_entry(
         config_entry.entry_id
     ]
 
-    binary_sensor = AdaptiveCoverBinarySensor(
-        config_entry,
-        config_entry.entry_id,
-        "Sun Infront",
-        False,
-        "sun_motion",
-        BinarySensorDeviceClass.MOTION,
-        coordinator,
-    )
-    manual_override = AdaptiveCoverBinarySensor(
-        config_entry,
-        config_entry.entry_id,
-        "Manual Override",
-        False,
-        "manual_override",
-        BinarySensorDeviceClass.RUNNING,
-        coordinator,
-    )
-    async_add_entities([binary_sensor, manual_override])
+    binary_sensors = []
+
+    object_type = config_entry.data.get(CONF_OBJECT_TYPE)
+
+    if object_type == ObjectType.WINDOW:
+        binary_sensor = AdaptiveCoverBinarySensor(
+            config_entry,
+            config_entry.entry_id,
+            "Sun Infront",
+            False,
+            "sun_motion",
+            BinarySensorDeviceClass.MOTION,
+            coordinator,
+        )
+        manual_override = AdaptiveCoverBinarySensor(
+            config_entry,
+            config_entry.entry_id,
+            "Manual Override",
+            False,
+            "manual_override",
+            BinarySensorDeviceClass.RUNNING,
+            coordinator,
+        )
+        binary_sensors = [binary_sensor, manual_override]
+
+    async_add_entities(binary_sensors)
 
 
 class AdaptiveCoverBinarySensor(
@@ -78,7 +85,7 @@ class AdaptiveCoverBinarySensor(
         self._key = key
         self._attr_translation_key = key
         self._name = config_entry.data["name"]
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
+        self._device_name = config_entry.data["name"]
         self._binary_name = binary_name
         self._attr_unique_id = f"{unique_id}_{binary_name}"
         self._device_id = unique_id
@@ -92,7 +99,7 @@ class AdaptiveCoverBinarySensor(
     @property
     def name(self):
         """Name of the entity."""
-        return f"{self._binary_name} {self._name}"
+        return f"{self._binary_name}"
 
     @property
     def is_on(self) -> bool:
